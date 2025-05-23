@@ -89,22 +89,23 @@ ___TEMPLATE_PARAMETERS___
           {
             "value": "variant",
             "displayValue": "Variant"
+          },
+          {
+            "value": "custom",
+            "subParams": [
+              {
+                "type": "TEXT",
+                "name": "customKey",
+                "displayName": "",
+                "simpleValueType": true,
+                "notSetText": "Please enter a value or select another key to map."
+              }
+            ],
+            "displayValue": "Custom",
+            "help": "Enter a custom key that is not in the list above. For example, if \"\u003ci\u003eitem_sku\u003c/i\u003e\" is available in your items object, you can return it by entering \"\u003ci\u003eitem_sku\u003c/i\u003e\"."
           }
         ],
         "simpleValueType": true
-      }
-    ]
-  },
-  {
-    "type": "GROUP",
-    "name": "CreatorGroup",
-    "displayName": "Creator",
-    "groupStyle": "ZIPPY_OPEN",
-    "subParams": [
-      {
-        "type": "LABEL",
-        "name": "CreatorLabel",
-        "displayName": "Made by \u003cstrong\u003e\u003ca href\u003d\"https://www.linkedin.com/in/jorgvandeven/\"\u003eJorg van de Ven\u003c/a\u003e\u003c/strong\u003e | \u003cstrong\u003e\u003ca href\u003dhttps://www.jorgvandeven.nl/ventastic-solutions?utm_source\u003dgoogle\u0026utm_medium\u003dgtm\u0026utm_campaign\u003dgtm_template_key_mapper\u003eVentastic Solutions\u003c/a\u003e\u003c/strong\u003e"
       }
     ]
   }
@@ -113,10 +114,14 @@ ___TEMPLATE_PARAMETERS___
 
 ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 
+const log = require('logToConsole');
 const copyFromDataLayer = require('copyFromDataLayer');
+
 let ecommerce;
 
+const customKey = data.customKey;
 const selected = data.mapValues;
+const key = data.key;
 
 if (selected === 'auto') {
    ecommerce = copyFromDataLayer('ecommerce', 1) || {};
@@ -130,34 +135,27 @@ let events = ecommerce.impressions || ecommerce.productClick|| ecommerce.detail 
 // All 
 let ecommerceArray = ecommerce.items || events.products || events || [];
 
-let id = ecommerceArray.map(obj => {if (obj.id) {return obj.id;} else {return obj.item_id;}});
-let name = ecommerceArray.map(obj => {if (obj.name) {return obj.name;} else {return obj.item_name;}});
-let price = ecommerceArray.map(obj => (obj.price));
-let brand = ecommerceArray.map(obj => {if (obj.brand) {return obj.brand;} else {return obj.item_brand;}});
-let quantity = ecommerceArray.map(obj => (obj.quantity));
-let category = ecommerceArray.map(obj => {if (obj.category) {return obj.category;} else {return obj.item_category;}});
-let variant = ecommerceArray.map(obj => {if (obj.variant) {return obj.variant;} else {return obj.item_variant;}});
-// let position
-
-let key = data.key;
-
-if (key === 'id') {
-  return id;
-} else if (key === 'name') {
-  return name;
-} else if (key === 'price') {
-  return price;
-} else if (key === 'brand') {
-  return brand;
-} else if (key === 'quantity') {
-  return quantity;
-} else if (key === 'category') {
-  return category;
-} else if (key === 'variant') {
-  return variant;
-} else {
-  return 'Not available';
+if (!ecommerceArray || !ecommerceArray.length || ecommerceArray.length === 0) {
+  return 'No products found';
 }
+
+const values = {
+  id: ecommerceArray.map(obj => obj.id || obj.item_id),
+  name: ecommerceArray.map(obj => obj.name || obj.item_name),
+  price: ecommerceArray.map(obj => obj.price),
+  brand: ecommerceArray.map(obj => obj.brand || obj.item_brand),
+  quantity: ecommerceArray.map(obj => obj.quantity),
+  category: ecommerceArray.map(obj => obj.category || obj.item_category),
+  variant: ecommerceArray.map(obj => obj.variant || obj.item_variant),
+  custom: ecommerceArray.map(obj => obj[customKey])
+};
+
+const result = values[key];
+const logKey = customKey || key;
+
+log("Returning value for key '" + logKey + "': " + result + ".");
+
+return result !== undefined ? result : 'No keys available';
 
 
 ___WEB_PERMISSIONS___
@@ -195,6 +193,27 @@ ___WEB_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "logging",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "environments",
+          "value": {
+            "type": 1,
+            "string": "debug"
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
   }
 ]
 
@@ -207,5 +226,3 @@ scenarios: []
 ___NOTES___
 
 Created on 26-8-2022 15:44:10
-
-
