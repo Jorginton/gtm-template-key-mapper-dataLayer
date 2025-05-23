@@ -1,6 +1,8 @@
 homepage: "https://www.jorgvandeven.nl/"
 documentation: "https://github.com/Jorginton/gtm-template-key-mapper-dataLayer/blob/main/README.md"
 versions:
-  #Latest Version.
+  #Latest Version. 
+  - sha: d2abc5c400b2cab8cae76a0ff1dd89d9582147cd
+    changeNotes: General code improvements for better efficiency and reduced error-proneness.
   - sha: cad4cd8ff7ba70f9442f0299c7d8629ee386a81b
     changeNotes: First Upload.
